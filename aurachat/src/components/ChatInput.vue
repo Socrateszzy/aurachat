@@ -1,186 +1,138 @@
 <script setup lang="ts">
-import { ref, computed, provide } from 'vue'
-import { Send, Loader2 } from 'lucide-vue-next'
+import { ref, onMounted, nextTick, watch, computed } from 'vue'
+import { Send } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
-import { streamChat, type ChatMessage } from '../services/deepseek'
+
+const emit = defineEmits<{
+  send: [content: string]
+}>()
 
 const store = useChatStore()
 const inputText = ref('')
-const isStreaming = ref(false)
-const abortController = ref<AbortController | null>(null)
-
-// 提供 isStreaming 给子组件使用
-provide('isStreaming', isStreaming)
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
 // 检查是否可以进行聊天
 const canSend = computed(() => {
   return (
-    !isStreaming.value &&
     inputText.value.trim().length > 0 &&
     store.apiKey.length > 0 &&
     store.currentSession
   )
 })
 
-// 发送消息
-async function sendMessage(message?: string) {
-  const userMessage = message || inputText.value.trim()
-  if (!store.currentSession) return
+// 处理发送
+function handleSend() {
+  const content = inputText.value.trim()
+  if (!canSend.value) return
 
-  const sessionId = store.currentSession.id
-  const currentMode = store.currentSession.mode
-  
-  // 添加用户消息
-  store.addMessage(sessionId, {
-    role: 'user',
-    content: userMessage,
-    timestamp: Date.now()
-  })
-
-  if (!message) {
-    inputText.value = ''
-  }
-  
-  // 准备流式响应
-  isStreaming.value = true
-  abortController.value = new AbortController()
-
-  // 构建消息历史（仅限用户和助手消息）
-  const historyMessages: ChatMessage[] = store.currentSession.messages
-    .map(msg => ({
-      role: msg.role as 'user' | 'assistant',
-      content: msg.content
-    }))
-
-  try {
-    await streamChat(
-      historyMessages,
-      currentMode,
-      store.apiKey,
-      // 流式更新最后一条消息
-      (chunk) => {
-        store.updateLastMessage(sessionId, chunk)
-      },
-      // 完成回调
-      () => {
-        isStreaming.value = false
-        abortController.value = null
-      },
-      // 错误回调
-      (error) => {
-        console.error('Stream error:', error)
-        isStreaming.value = false
-        abortController.value = null
-        
-        // 添加错误消息
-        store.addMessage(sessionId, {
-          role: 'assistant',
-          content: `抱歉，发生了错误：${error.message}`,
-          timestamp: Date.now()
-        })
-      },
-      abortController.value.signal
-    )
-  } catch (error) {
-    console.error('Send message error:', error)
-    isStreaming.value = false
-    abortController.value = null
-  }
-}
-
-// 停止生成
-function stopGenerating() {
-  if (abortController.value) {
-    abortController.value.abort()
-    isStreaming.value = false
-    abortController.value = null
-  }
+  emit('send', content)
+  inputText.value = ''
+  resetTextareaHeight()
 }
 
 // 处理键盘事件
 function handleKeyDown(e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault()
-    sendMessage()
+    handleSend()
+  }
+  // Shift+Enter 允许换行，不 prevent
+}
+
+// 重置 textarea 高度
+function resetTextareaHeight() {
+  nextTick(() => {
+    if (textareaRef.value) {
+      textareaRef.value.style.height = 'auto'
+      textareaRef.value.style.height = 'auto' // 重置
+    }
+  })
+}
+
+// 动态调整 textarea 高度
+function adjustTextareaHeight() {
+  if (!textareaRef.value) return
+
+  const el = textareaRef.value
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px'
+}
+
+// 聚焦输入框
+function focus() {
+  if (textareaRef.value) {
+    textareaRef.value.focus()
   }
 }
 
-// 检查API Key是否已设置
-const hasApiKey = computed(() => {
-  return store.apiKey.length > 0
+// 监听输入文本变化，调整高度
+watch(inputText, () => {
+  nextTick(() => {
+    adjustTextareaHeight()
+  })
 })
 
-// 处理快捷提示
-function handleQuickPrompt(prompt: string) {
-  inputText.value = prompt
-  sendMessage(prompt)
-}
-
-// 用于模板的无参数版本
-function sendMessageHandler() {
-  sendMessage()
-}
+// 初始化
+onMounted(() => {
+  focus()
+})
 
 // 暴露方法给父组件
 defineExpose({
-  handleQuickPrompt
+  focus
 })
 </script>
 
 <template>
   <div class="w-full">
     <!-- API Key 提示 -->
-    <div v-if="!hasApiKey" class="mb-4 p-3 bg-amber-900/30 border border-amber-700/50 rounded-lg">
+    <div v-if="!store.apiKey" class="mb-4 p-3 bg-amber-900/30 border border-amber-700/50 rounded-lg">
       <p class="text-amber-200 text-sm">
         请先点击左侧边栏底部的"设置"按钮，输入您的 DeepSeek API Key 以开始对话。
       </p>
     </div>
 
-    <div class="relative">
+    <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+      <!-- 文本输入区域 -->
       <textarea
+        ref="textareaRef"
         v-model="inputText"
         @keydown="handleKeyDown"
-        :disabled="isStreaming || !hasApiKey"
-        :placeholder="hasApiKey ? '输入消息... (Shift+Enter换行，Enter发送)' : '请先设置 API Key'"
-        class="w-full px-4 py-3 pr-12 bg-gray-800 border border-gray-700 rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-        rows="3"
+        :disabled="!store.apiKey"
+        :placeholder="store.apiKey ? '输入消息... (Shift+Enter换行，Enter发送)' : '请先设置 API Key'"
+        class="w-full px-4 py-3 bg-transparent text-gray-100 placeholder-gray-500 focus:outline-none resize-none min-h-[44px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
+        rows="1"
       />
 
-      <!-- 发送/停止按钮 -->
-      <div class="absolute right-2 bottom-2 flex gap-2">
-        <button
-          v-if="isStreaming"
-          @click="stopGenerating"
-          class="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-          title="停止生成"
-        >
-          <div class="w-5 h-5 flex items-center justify-center">
-            <div class="w-4 h-4 bg-current rounded-sm"></div>
-          </div>
-        </button>
+      <!-- 底部工具栏 -->
+      <div class="flex items-center justify-between px-4 py-2 border-t border-gray-700 bg-gray-800/50">
+        <!-- 左侧：字数统计 -->
+        <div class="text-xs text-gray-500">
+          {{ inputText.length }} 字
+        </div>
 
-        <button
-          v-else
-          @click="sendMessageHandler"
-          :disabled="!canSend"
-          :class="[
-            'p-2 rounded-lg transition-colors',
-            canSend
-              ? 'bg-purple-600 hover:bg-purple-700 text-white'
-              : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-          ]"
-          title="发送消息"
-        >
-          <Send v-if="!isStreaming" :size="20" />
-          <Loader2 v-else :size="20" class="animate-spin" />
-        </button>
+        <!-- 右侧：发送/停止按钮 -->
+        <div class="flex items-center gap-2">
+          <!-- 这里预留 isStreaming 状态，由父组件传递 -->
+          <slot name="controls" :canSend="canSend" :inputText="inputText">
+            <!-- 默认按钮，父组件可以覆盖 -->
+            <button
+              @click="handleSend"
+              :disabled="!canSend"
+              :class="[
+                'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium',
+                canSend
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              ]"
+              title="发送消息"
+            >
+              <Send :size="16" />
+              发送
+            </button>
+          </slot>
+        </div>
       </div>
-    </div>
-
-    <!-- 使用提示 -->
-    <div class="mt-2 text-xs text-gray-500 flex flex-wrap gap-4">
-      <div>支持：代码生成、文本翻译、文章润色</div>
-      <div>Streaming: {{ isStreaming ? '进行中...' : '等待输入' }}</div>
     </div>
   </div>
 </template>

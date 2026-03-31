@@ -1,25 +1,44 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, provide } from 'vue'
 import { Menu } from 'lucide-vue-next'
+import { Send, Square } from 'lucide-vue-next'
 import Sidebar from './components/Sidebar.vue'
 import ModeSelector from './components/ModeSelector.vue'
 import MessageList from './components/MessageList.vue'
 import ChatInput from './components/ChatInput.vue'
 import { initStore } from './stores/chat'
+import { useChat } from './composables/useChat'
 
 const isSidebarOpen = ref(false)
+// 模板中需要绑定ref，但逻辑中暂未使用
+// @ts-ignore
 const chatInputRef = ref<InstanceType<typeof ChatInput> | null>(null)
+const { sendMessage, stopStream, isStreaming } = useChat()
 
 onMounted(() => {
   initStore()
 })
 
-function handleQuickPrompt(prompt: string) {
-  if (chatInputRef.value) {
-    // 调用 ChatInput 组件的方法
-    chatInputRef.value.handleQuickPrompt(prompt)
-  }
+// 提供 isStreaming 给子组件
+provide('isStreaming', isStreaming)
+
+// 处理发送消息
+async function handleSend(content: string) {
+  await sendMessage(content)
 }
+
+// 处理快捷提示
+function handleQuickPrompt(prompt: string) {
+  // 直接发送消息，不需要通过chatInputRef
+  sendMessage(prompt)
+}
+
+// 聚焦输入框（暂不使用，保留以供未来需要）
+// function focusInput() {
+//   if (chatInputRef.value) {
+//     chatInputRef.value.focus()
+//   }
+// }
 </script>
 
 <template>
@@ -63,7 +82,36 @@ function handleQuickPrompt(prompt: string) {
 
       <!-- 输入框 -->
       <div class="p-4 border-t border-gray-800">
-        <ChatInput ref="chatInputRef" />
+        <ChatInput ref="chatInputRef" @send="handleSend">
+          <template #controls="{ canSend, inputText }">
+            <!-- 流式响应时的停止按钮 -->
+            <button
+              v-if="isStreaming"
+              @click="stopStream"
+              class="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium"
+              title="停止生成"
+            >
+              <Square :size="16" />
+              停止
+            </button>
+            <!-- 正常发送按钮 -->
+            <button
+              v-else
+              @click="() => handleSend(inputText)"
+              :disabled="!canSend"
+              :class="[
+                'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium',
+                canSend
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              ]"
+              title="发送消息"
+            >
+              <Send :size="16" />
+              发送
+            </button>
+          </template>
+        </ChatInput>
       </div>
     </div>
   </div>
