@@ -3,7 +3,6 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { Square } from 'lucide-vue-next'
 import Sidebar from './components/Sidebar.vue'
 import ModeSelector from './components/ModeSelector.vue'
-import ModelSelector from './components/ModelSelector.vue'
 import MessageList from './components/MessageList.vue'
 import ChatInput from './components/ChatInput.vue'
 import { initStore } from './stores/chat'
@@ -82,14 +81,8 @@ async function handleSend(content: string) {
         </svg>
       </button>
       
-      <!-- 顶部工具栏 -->
-      <div class="top-toolbar">
-        <!-- 模式选择器 -->
-        <ModeSelector />
-        
-        <!-- 模型选择器 -->
-        <ModelSelector />
-      </div>
+      <!-- 模式选择器（现在包含模型选择器） -->
+      <ModeSelector />
       
       <!-- 消息列表 -->
       <MessageList 

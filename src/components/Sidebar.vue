@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { SquarePen, Search, Trash2 } from 'lucide-vue-next'
+import { SquarePen, Search, Trash2, Settings } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
 import ThemeToggle from './ThemeToggle.vue'
+import AboutModal from './AboutModal.vue'
 
 const store = useChatStore()
 const searchQuery = ref('')
 const hoveredSessionId = ref<string | null>(null)
+const showAbout = ref(false)
 
 // 计算是否显示搜索栏（会话超过5个）
 const showSearch = computed(() => {
@@ -117,10 +119,20 @@ function handleMouseLeave() {
 
     <!-- 底部区域 -->
     <div class="sidebar-bottom">
-      <div>
+      <div class="flex flex-col gap-2">
+        <button
+          @click="showAbout = true"
+          class="settings-btn"
+        >
+          <Settings :size="16" />
+          <span>关于</span>
+        </button>
         <ThemeToggle />
       </div>
     </div>
+
+    <!-- 关于弹窗 -->
+    <AboutModal v-if="showAbout" @close="showAbout = false" />
   </div>
 </template>
 

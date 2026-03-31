@@ -4,6 +4,7 @@ import { MessageCircle, Code2, Languages, PenLine } from 'lucide-vue-next'
 import { MODES, type ModeKey } from '../services/chatService'
 import { useChatStore } from '../stores/chat'
 import ThemeToggle from './ThemeToggle.vue'
+import ModelSelector from './ModelSelector.vue'
 
 const store = useChatStore()
 
@@ -55,6 +56,12 @@ function switchMode(mode: string) {
         />
         <span class="mode-label sm:hidden">{{ config.label }}</span>
       </button>
+    </div>
+    
+    <div class="spacer flex-1"></div>
+    
+    <div class="model-selector-wrapper">
+      <ModelSelector />
     </div>
     
     <div class="theme-toggle-wrapper">
@@ -113,8 +120,12 @@ function switchMode(mode: string) {
   white-space: nowrap;
 }
 
+.model-selector-wrapper {
+  margin: 0 8px;
+}
+
 .theme-toggle-wrapper {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 /* 移动端适配 */
@@ -125,6 +136,10 @@ function switchMode(mode: string) {
   
   .mode-tab {
     padding: 6px 8px;
+  }
+  
+  .model-selector-wrapper {
+    display: none;
   }
 }
 </style>
