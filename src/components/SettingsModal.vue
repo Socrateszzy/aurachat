@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { X, Sun, Moon } from 'lucide-vue-next'
-import { useChatStore } from '../stores/chat'
+import { X, Sun, Moon, Server } from 'lucide-vue-next'
 import { useThemeStore } from '../stores/theme'
-import { MODELS, PROVIDER_COLORS } from '../config/models'
 
 const props = defineProps<{
   modelValue?: boolean
@@ -13,14 +10,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const store = useChatStore()
 const themeStore = useThemeStore()
-
-// 当前选择的模型
-const selectedModelId = computed({
-  get: () => store.selectedModelId,
-  set: (value) => store.setModel(value)
-})
 
 // 辅助函数
 function setTheme(dark: boolean) {
@@ -35,11 +25,6 @@ function handleBackdropClick(e: MouseEvent) {
   if ((e.target as HTMLElement).classList.contains('modal-backdrop')) {
     emit('close')
   }
-}
-
-function handleSave() {
-  // 这里可以添加其他保存逻辑
-  emit('close')
 }
 </script>
 
@@ -63,55 +48,6 @@ function handleSave() {
       <!-- 内容区域 -->
       <div class="p-6">
         <div class="space-y-6">
-          <!-- 模型选择 -->
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">
-              默认模型
-            </label>
-            <div class="space-y-2">
-              <select
-                v-model="selectedModelId"
-                class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              >
-                <option v-for="model in MODELS" :key="model.id" :value="model.id">
-                  {{ model.provider }} - {{ model.name }}
-                </option>
-              </select>
-              <div v-if="selectedModelId" class="mt-2 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
-                <div class="flex items-center gap-2 mb-1">
-                  <div 
-                    class="w-3 h-3 rounded-full"
-                    :style="{ backgroundColor: PROVIDER_COLORS[MODELS.find(m => m.id === selectedModelId)?.providerIcon || 'deepseek'] }"
-                  ></div>
-                  <span class="font-medium text-gray-200">
-                    {{ MODELS.find(m => m.id === selectedModelId)?.name }}
-                  </span>
-                  <span 
-                    v-if="MODELS.find(m => m.id === selectedModelId)?.badge"
-                    class="px-2 py-0.5 text-xs rounded-full bg-purple-600 text-white"
-                  >
-                    {{ MODELS.find(m => m.id === selectedModelId)?.badge }}
-                  </span>
-                </div>
-                <p class="text-sm text-gray-400">
-                  {{ MODELS.find(m => m.id === selectedModelId)?.description }}
-                </p>
-                <div class="flex flex-wrap gap-1 mt-2">
-                  <span 
-                    v-for="tag in MODELS.find(m => m.id === selectedModelId)?.tags" 
-                    :key="tag"
-                    class="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded"
-                  >
-                    {{ tag }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <p class="mt-2 text-sm text-gray-400">
-              更改后将应用于新对话
-            </p>
-          </div>
-
           <!-- 主题设置 -->
           <div>
             <h3 class="text-lg font-medium text-gray-200 mb-4">主题设置</h3>
@@ -154,14 +90,33 @@ function handleSave() {
 
           <!-- 后端状态 -->
           <div>
-            <h3 class="text-lg font-medium text-gray-200 mb-4">后端状态</h3>
-            <div class="p-3 bg-gray-900/50 rounded-lg border border-gray-700">
-              <p class="text-sm text-gray-300">
+            <div class="flex items-center gap-2 mb-4">
+              <Server :size="18" class="text-gray-300" />
+              <h3 class="text-lg font-medium text-gray-200">后端状态</h3>
+            </div>
+            <div class="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
+              <p class="text-sm text-gray-300 mb-2">
                 API 服务器已移至后端，无需在前端配置 API Key。
               </p>
-              <p class="text-sm text-gray-400 mt-1">
-                请确保后端服务器正在运行，并配置了相应的 API Key。
-              </p>
+              <ul class="text-sm text-gray-400 space-y-1">
+                <li class="flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span>后端代理已连接：<code class="bg-gray-800 px-2 py-0.5 rounded">localhost:3001</code></span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span>支持 6 种 AI 模型</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span>流式响应已启用</span>
+                </li>
+              </ul>
+              <div class="mt-4 p-3 bg-gray-800/50 rounded border border-gray-700">
+                <p class="text-xs text-gray-400">
+                  如需修改后端配置，请编辑 <code class="bg-gray-900 px-1.5 py-0.5 rounded">server/.env</code> 文件中的 API Key。
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -173,13 +128,7 @@ function handleSave() {
           @click="$emit('close')"
           class="px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors"
         >
-          取消
-        </button>
-        <button
-          @click="handleSave"
-          class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-        >
-          保存
+          关闭
         </button>
       </div>
     </div>

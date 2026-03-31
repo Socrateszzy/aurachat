@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { SquarePen, Search, Settings, Trash2 } from 'lucide-vue-next'
+import { SquarePen, Search, Trash2 } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
 import ThemeToggle from './ThemeToggle.vue'
-import SettingsModal from './SettingsModal.vue'
 
 const store = useChatStore()
-const showSettings = ref(false)
 const searchQuery = ref('')
 const hoveredSessionId = ref<string | null>(null)
 
@@ -119,20 +117,10 @@ function handleMouseLeave() {
 
     <!-- 底部区域 -->
     <div class="sidebar-bottom">
-      <div class="mb-2">
+      <div>
         <ThemeToggle />
       </div>
-      <button
-        @click="showSettings = true"
-        class="settings-btn"
-      >
-        <Settings :size="16" />
-        <span>设置</span>
-      </button>
     </div>
-
-    <!-- 设置弹窗 -->
-    <SettingsModal v-if="showSettings" @close="showSettings = false" />
   </div>
 </template>
 

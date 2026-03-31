@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { Square } from 'lucide-vue-next'
 import Sidebar from './components/Sidebar.vue'
 import ModeSelector from './components/ModeSelector.vue'
+import ModelSelector from './components/ModelSelector.vue'
 import MessageList from './components/MessageList.vue'
 import ChatInput from './components/ChatInput.vue'
 import { initStore } from './stores/chat'
@@ -81,8 +82,14 @@ async function handleSend(content: string) {
         </svg>
       </button>
       
-      <!-- 模式选择器 -->
-      <ModeSelector />
+      <!-- 顶部工具栏 -->
+      <div class="top-toolbar">
+        <!-- 模式选择器 -->
+        <ModeSelector />
+        
+        <!-- 模型选择器 -->
+        <ModelSelector />
+      </div>
       
       <!-- 消息列表 -->
       <MessageList 
@@ -161,6 +168,18 @@ async function handleSend(content: string) {
   overflow: hidden;
   min-width: 0;
   position: relative;
+}
+
+/* 顶部工具栏 */
+.top-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 48px;
+  background: var(--topbar-bg);
+  border-bottom: 1px solid var(--topbar-border);
+  gap: 8px;
 }
 
 /* 移动端菜单按钮 */
