@@ -29,22 +29,25 @@ function switchMode(mode: string) {
 </script>
 
 <template>
-  <div class="flex items-center gap-2 overflow-x-auto pb-2">
-    <div class="text-sm text-gray-400 mr-2 flex-shrink-0">模式:</div>
-    <div class="flex gap-1">
+  <div class="bg-gray-900 border-b border-gray-800">
+    <div class="flex overflow-x-auto">
       <button
         v-for="[key, config] in Object.entries(MODES)"
         :key="key"
         @click="switchMode(key)"
         :class="[
-          'flex items-center gap-2 px-3 py-2 rounded-lg transition-all flex-shrink-0',
+          'flex items-center gap-2 px-6 py-4 transition-all flex-shrink-0 relative',
           currentMode === key
-            ? 'bg-purple-600 text-white'
-            : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+            ? 'text-blue-400'
+            : 'text-gray-400 hover:text-gray-300'
         ]"
       >
-        <component :is="modeIcons[key as keyof typeof modeIcons]" :size="16" />
-        <span class="text-sm">{{ config.label }}</span>
+        <component :is="modeIcons[key as keyof typeof modeIcons]" :size="18" />
+        <span class="text-sm font-medium">{{ config.label }}</span>
+        <div
+          v-if="currentMode === key"
+          class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400"
+        ></div>
       </button>
     </div>
   </div>

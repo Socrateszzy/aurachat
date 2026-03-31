@@ -8,10 +8,18 @@ import ChatInput from './components/ChatInput.vue'
 import { initStore } from './stores/chat'
 
 const isSidebarOpen = ref(false)
+const chatInputRef = ref<InstanceType<typeof ChatInput> | null>(null)
 
 onMounted(() => {
   initStore()
 })
+
+function handleQuickPrompt(prompt: string) {
+  if (chatInputRef.value) {
+    // 调用 ChatInput 组件的方法
+    chatInputRef.value.handleQuickPrompt(prompt)
+  }
+}
 </script>
 
 <template>
@@ -48,14 +56,14 @@ onMounted(() => {
         <ModeSelector />
       </div>
 
-      <!-- 消息列表 -->
-      <div class="flex-1 overflow-hidden">
-        <MessageList />
-      </div>
+  <!-- 消息列表 -->
+  <div class="flex-1 overflow-hidden">
+    <MessageList @send="handleQuickPrompt" />
+  </div>
 
       <!-- 输入框 -->
       <div class="p-4 border-t border-gray-800">
-        <ChatInput />
+        <ChatInput ref="chatInputRef" />
       </div>
     </div>
   </div>

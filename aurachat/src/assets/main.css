@@ -1,1 +1,130 @@
 @import "tailwindcss";
+
+/* 流式光标动画 */
+.streaming-cursor::after {
+  content: '█';
+  animation: blink 0.7s infinite;
+  margin-left: 2px;
+  opacity: 0.8;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.2; }
+}
+
+/* 代码块样式 */
+.hljs {
+  background: #1a1a2e !important;
+  border-radius: 0.5rem;
+  padding: 1rem !important;
+  overflow-x: auto;
+}
+
+.hljs code {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Markdown 内容样式 */
+.prose {
+  color: #e5e7eb;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: #f3f4f6;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+.prose h1 { font-size: 1.875rem; }
+.prose h2 { font-size: 1.5rem; }
+.prose h3 { font-size: 1.25rem; }
+
+.prose p {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  line-height: 1.75;
+}
+
+.prose ul, .prose ol {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose li > p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.prose blockquote {
+  border-left: 4px solid #4b5563;
+  padding-left: 1em;
+  font-style: italic;
+  margin: 1.5em 0;
+  color: #9ca3af;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+}
+
+.prose th, .prose td {
+  border: 1px solid #4b5563;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.prose th {
+  background-color: #374151;
+  font-weight: 600;
+}
+
+.prose a {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #93c5fd;
+}
+
+.prose code:not(.hljs code) {
+  background-color: #374151;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.prose pre {
+  margin: 1.5em 0;
+  overflow-x: auto;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

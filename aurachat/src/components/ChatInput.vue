@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, provide } from 'vue'
 import { Send, Loader2 } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
 import { streamChat, type ChatMessage } from '../services/deepseek'
@@ -8,6 +8,9 @@ const store = useChatStore()
 const inputText = ref('')
 const isStreaming = ref(false)
 const abortController = ref<AbortController | null>(null)
+
+// 提供 isStreaming 给子组件使用
+provide('isStreaming', isStreaming)
 
 // 检查是否可以进行聊天
 const canSend = computed(() => {
@@ -20,11 +23,11 @@ const canSend = computed(() => {
 })
 
 // 发送消息
-async function sendMessage() {
-  if (!canSend.value || !store.currentSession) return
+async function sendMessage(message?: string) {
+  const userMessage = message || inputText.value.trim()
+  if (!store.currentSession) return
 
   const sessionId = store.currentSession.id
-  const userMessage = inputText.value.trim()
   const currentMode = store.currentSession.mode
   
   // 添加用户消息
@@ -34,7 +37,9 @@ async function sendMessage() {
     timestamp: Date.now()
   })
 
-  inputText.value = ''
+  if (!message) {
+    inputText.value = ''
+  }
   
   // 准备流式响应
   isStreaming.value = true
@@ -104,6 +109,22 @@ function handleKeyDown(e: KeyboardEvent) {
 const hasApiKey = computed(() => {
   return store.apiKey.length > 0
 })
+
+// 处理快捷提示
+function handleQuickPrompt(prompt: string) {
+  inputText.value = prompt
+  sendMessage(prompt)
+}
+
+// 用于模板的无参数版本
+function sendMessageHandler() {
+  sendMessage()
+}
+
+// 暴露方法给父组件
+defineExpose({
+  handleQuickPrompt
+})
 </script>
 
 <template>
@@ -140,7 +161,7 @@ const hasApiKey = computed(() => {
 
         <button
           v-else
-          @click="sendMessage"
+          @click="sendMessageHandler"
           :disabled="!canSend"
           :class="[
             'p-2 rounded-lg transition-colors',
