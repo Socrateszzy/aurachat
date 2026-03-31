@@ -91,11 +91,11 @@ watch(messages, () => {
     <!-- 消息列表容器 -->
     <div ref="listRef" class="flex-1 overflow-y-auto p-4">
       <!-- 无消息时的欢迎区域 -->
-      <div v-if="messages.length === 0" class="flex flex-col items-center justify-center h-full text-gray-300">
+      <div v-if="messages.length === 0" class="flex flex-col items-center justify-center h-full text-[var(--text-muted)]">
         <div class="max-w-2xl w-full text-center">
-          <Bot :size="64" class="mx-auto mb-6 text-blue-400" />
-          <h1 class="text-3xl font-bold mb-8">欢迎使用 AuraChat</h1>
-          <p class="text-gray-400 mb-10 text-lg">
+          <Bot :size="64" class="mx-auto mb-6 text-[var(--accent)]" />
+          <h1 class="text-3xl font-bold mb-8 text-[var(--text-primary)]">欢迎使用 AuraChat</h1>
+          <p class="text-[var(--text-secondary)] mb-10 text-lg">
             选择模式开始对话，或使用下面的快捷提示
           </p>
           
@@ -104,10 +104,10 @@ watch(messages, () => {
               v-for="(prompt, index) in quickPrompts"
               :key="index"
               @click="sendQuickPrompt(prompt.text)"
-              class="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl p-5 text-left transition-all hover:scale-[1.02]"
+              class="bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] border border-[var(--card-border)] rounded-xl p-5 text-left transition-all hover:scale-[1.02]"
             >
-              <div class="text-sm font-medium text-blue-400 mb-1">快捷提示</div>
-              <div class="text-gray-200">{{ prompt.text }}</div>
+              <div class="text-sm font-medium text-[var(--accent)] mb-1">快捷提示</div>
+              <div class="text-[var(--text-primary)]">{{ prompt.text }}</div>
             </button>
           </div>
         </div>
@@ -131,7 +131,7 @@ watch(messages, () => {
           <!-- 用户消息 -->
           <div
             v-if="msg.role === 'user'"
-            class="max-w-[70%] bg-blue-600 text-white rounded-2xl px-4 py-2"
+            class="max-w-[70%] bg-[var(--bubble-user-bg)] text-[var(--bubble-user-text)] rounded-2xl px-4 py-2"
           >
             <div class="whitespace-pre-wrap break-words">{{ msg.content }}</div>
           </div>
@@ -139,10 +139,10 @@ watch(messages, () => {
           <!-- 助手消息 -->
           <div
             v-else
-            class="max-w-[85%] bg-gray-800 rounded-2xl px-4 py-3"
+            class="max-w-[85%] bg-[var(--bubble-ai-bg)] border border-[var(--bubble-ai-border)] rounded-2xl px-4 py-3"
           >
             <div
-              class="prose prose-invert max-w-none text-gray-200"
+              class="prose prose-invert max-w-none text-[var(--text-primary)]"
               v-html="getMessageHtml(msg)"
             ></div>
           </div>

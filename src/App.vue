@@ -42,11 +42,11 @@ function handleQuickPrompt(prompt: string) {
 </script>
 
 <template>
-  <div class="flex h-screen overflow-hidden bg-gray-950 text-gray-100">
+  <div class="flex h-screen overflow-hidden bg-[var(--main-bg)] text-[var(--text-primary)]">
     <!-- 移动端汉堡菜单 -->
     <button
       @click="isSidebarOpen = !isSidebarOpen"
-      class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+      class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[var(--sidebar-item-hover)] rounded-lg hover:bg-[var(--sidebar-item-active)] transition-colors"
     >
       <Menu :size="20" />
     </button>
@@ -71,7 +71,7 @@ function handleQuickPrompt(prompt: string) {
     <!-- 主内容区域 -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- 顶部模式选择器 -->
-      <div class="p-4 border-b border-gray-800">
+      <div class="p-4 border-b border-[var(--topbar-border)] bg-[var(--topbar-bg)]">
         <ModeSelector />
       </div>
 
@@ -81,7 +81,7 @@ function handleQuickPrompt(prompt: string) {
   </div>
 
       <!-- 输入框 -->
-      <div class="p-4 border-t border-gray-800">
+      <div class="p-4 border-t border-[var(--topbar-border)] bg-[var(--topbar-bg)]">
         <ChatInput ref="chatInputRef" @send="handleSend">
           <template #controls="{ canSend, inputText }">
             <!-- 流式响应时的停止按钮 -->
@@ -102,8 +102,8 @@ function handleQuickPrompt(prompt: string) {
               :class="[
                 'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium',
                 canSend
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                  ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white'
+                  : 'bg-[var(--input-bg)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--input-border)]'
               ]"
               title="发送消息"
             >

@@ -30,9 +30,9 @@ function handleNewChat() {
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-gray-900 border-r border-gray-800">
+  <div class="flex flex-col h-full sidebar">
     <!-- 顶部区域 -->
-    <div class="p-4 border-b border-gray-800">
+    <div class="p-4 border-b sidebar-border">
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
           AuraChat
@@ -40,7 +40,7 @@ function handleNewChat() {
       </div>
       <button
         @click="handleNewChat"
-        class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+        class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg transition-colors"
       >
         <Plus :size="16" />
         新对话
@@ -57,31 +57,31 @@ function handleNewChat() {
           :class="[
             'session-item group relative flex items-center justify-between p-3 rounded-lg mb-1 cursor-pointer transition-colors',
             store.currentSessionId === session.id
-              ? 'bg-gray-700'
-              : 'hover:bg-gray-800'
+              ? 'sidebar-item-active'
+              : 'hover:sidebar-item-hover'
           ]"
         >
           <div class="flex-1 min-w-0">
-            <div class="font-medium truncate">{{ session.title }}</div>
-            <div class="text-xs text-gray-400 mt-1">
+            <div class="font-medium truncate text-[var(--text-primary)]">{{ session.title }}</div>
+            <div class="text-xs text-[var(--text-muted)] mt-1">
               {{ formatTime(session.createdAt) }}
             </div>
           </div>
           <button
             @click.stop="store.deleteSession(session.id)"
-            class="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-600 rounded transition-opacity"
+            class="opacity-0 group-hover:opacity-100 p-1 hover:bg-[var(--sidebar-item-hover)] rounded transition-opacity"
           >
-            <Trash2 :size="14" class="text-gray-400" />
+            <Trash2 :size="14" class="text-[var(--text-muted)]" />
           </button>
         </div>
       </TransitionGroup>
     </div>
 
     <!-- 底部设置 -->
-    <div class="p-4 border-t border-gray-800">
+    <div class="p-4 border-t sidebar-border">
       <button
         @click="showSettings = true"
-        class="w-full flex items-center justify-center gap-2 px-4 py-2 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+        class="w-full flex items-center justify-center gap-2 px-4 py-2 text-[var(--text-secondary)] hover:bg-[var(--sidebar-item-hover)] rounded-lg transition-colors"
       >
         <Settings :size="18" />
         设置
@@ -94,6 +94,24 @@ function handleNewChat() {
 </template>
 
 <style scoped>
+/* 侧边栏样式 */
+.sidebar {
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+}
+
+.sidebar-border {
+  border-color: var(--sidebar-border);
+}
+
+.sidebar-item-hover {
+  background-color: var(--sidebar-item-hover);
+}
+
+.sidebar-item-active {
+  background-color: var(--sidebar-item-active);
+}
+
 /* 会话列表过渡动画 */
 .session-enter-from {
   opacity: 0;

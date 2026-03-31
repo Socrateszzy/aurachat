@@ -1,5 +1,94 @@
 @import "tailwindcss";
 
+/* CSS 变量主题系统 */
+:root {
+  /* 侧边栏 */
+  --sidebar-width: 260px;
+  --sidebar-bg: #161b27;
+  --sidebar-item-hover: #1e2538;
+  --sidebar-item-active: #2d3447;
+  --sidebar-border: #1e2334;
+
+  /* 主区域 */
+  --main-bg: #0f1117;
+  --topbar-bg: #0f1117;
+  --topbar-border: #1e2334;
+
+  /* 消息气泡 */
+  --bubble-user-bg: #3b5bdb;
+  --bubble-user-text: #fff;
+  --bubble-ai-bg: #161b27;
+  --bubble-ai-border: #2a2f3d;
+
+  /* 输入框 */
+  --input-bg: #161b27;
+  --input-border: #2a2f3d;
+  --input-border-focus: #3b5bdb;
+  --input-placeholder: #4a5270;
+
+  /* 快捷卡片 */
+  --card-bg: #161b27;
+  --card-border: #2a2f3d;
+  --card-hover-bg: #1e2538;
+
+  /* 文字层级 */
+  --text-primary: #e2e8f0;
+  --text-secondary: #a0aec0;
+  --text-muted: #6b7594;
+
+  /* 强调色 */
+  --accent: #3b5bdb;
+  --accent-hover: #4361ee;
+
+  /* 代码块 */
+  --code-bg: #0d1117;
+  --code-border: #21262d;
+}
+
+/* 亮色主题 */
+html.light {
+  --sidebar-width: 260px;
+  --sidebar-bg: #f8f9fb;
+  --sidebar-item-hover: #eef0f5;
+  --sidebar-item-active: #e4e7f0;
+  --sidebar-border: #e2e6ef;
+
+  --main-bg: #ffffff;
+  --topbar-bg: #ffffff;
+  --topbar-border: #e2e6ef;
+
+  --bubble-user-bg: #3b5bdb;
+  --bubble-user-text: #fff;
+  --bubble-ai-bg: #f3f4f8;
+  --bubble-ai-border: #e2e6ef;
+
+  --input-bg: #f3f4f8;
+  --input-border: #dde1ec;
+  --input-border-focus: #3b5bdb;
+  --input-placeholder: #9ea8c5;
+
+  --card-bg: #f3f4f8;
+  --card-border: #dde1ec;
+  --card-hover-bg: #eaecf5;
+
+  --text-primary: #1a1d2e;
+  --text-secondary: #4a5270;
+  --text-muted: #8892b0;
+
+  --accent: #3b5bdb;
+  --accent-hover: #4361ee;
+
+  --code-bg: #f0f1f5;
+  --code-border: #dde1ec;
+}
+
+/* 全局过渡（切主题时平滑） */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.1s ease;
+}
+/* 但动画类不要过渡颜色 */
+.streaming-cursor { transition: none; }
+
 /* 流式光标动画 */
 .streaming-cursor::after {
   content: '█';
@@ -15,7 +104,7 @@
 
 /* 代码块样式 */
 .hljs {
-  background: #1a1a2e !important;
+  background: var(--code-bg) !important;
   border-radius: 0.5rem;
   padding: 1rem !important;
   overflow-x: auto;
@@ -28,11 +117,11 @@
 
 /* Markdown 内容样式 */
 .prose {
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4 {
-  color: #f3f4f6;
+  color: var(--text-primary);
   margin-top: 1.5em;
   margin-bottom: 0.5em;
   font-weight: 600;
@@ -65,11 +154,11 @@
 }
 
 .prose blockquote {
-  border-left: 4px solid #4b5563;
+  border-left: 4px solid var(--text-muted);
   padding-left: 1em;
   font-style: italic;
   margin: 1.5em 0;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .prose table {
@@ -79,27 +168,27 @@
 }
 
 .prose th, .prose td {
-  border: 1px solid #4b5563;
+  border: 1px solid var(--text-muted);
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
 
 .prose th {
-  background-color: #374151;
+  background-color: var(--code-bg);
   font-weight: 600;
 }
 
 .prose a {
-  color: #60a5fa;
+  color: var(--accent);
   text-decoration: underline;
 }
 
 .prose a:hover {
-  color: #93c5fd;
+  color: var(--accent-hover);
 }
 
 .prose code:not(.hljs code) {
-  background-color: #374151;
+  background-color: var(--code-bg);
   padding: 0.2em 0.4em;
   border-radius: 0.25rem;
   font-size: 0.875em;
@@ -127,4 +216,13 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* 为亮色主题调整滚动条 */
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
 }

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { X, Eye, EyeOff, ExternalLink } from 'lucide-vue-next'
+import { X, Eye, EyeOff, ExternalLink, Sun, Moon } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
+import { useTheme } from '../composables/useTheme'
 
 const props = defineProps<{
   modelValue?: boolean
@@ -14,6 +15,9 @@ const emit = defineEmits<{
 const store = useChatStore()
 const apiKeyInput = ref(store.apiKey)
 const showApiKey = ref(false)
+
+// 主题管理
+const { theme, toggleTheme, setTheme } = useTheme()
 
 function saveApiKey() {
   store.setApiKey(apiKeyInput.value)
@@ -82,9 +86,49 @@ function handleBackdropClick(e: MouseEvent) {
             </p>
           </div>
 
+          <!-- 主题设置 -->
+          <div>
+            <h3 class="text-lg font-medium text-gray-200 mb-4">主题设置</h3>
+            <div class="flex items-center gap-4">
+              <button
+                @click="setTheme('dark')"
+                :class="[
+                  'flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
+                  theme === 'dark'
+                    ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
+                    : 'bg-gray-900 text-gray-400 border-gray-700 hover:bg-gray-800'
+                ]"
+              >
+                <Moon :size="16" />
+                深色
+              </button>
+              <button
+                @click="setTheme('light')"
+                :class="[
+                  'flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
+                  theme === 'light'
+                    ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
+                    : 'bg-gray-900 text-gray-400 border-gray-700 hover:bg-gray-800'
+                ]"
+              >
+                <Sun :size="16" />
+                浅色
+              </button>
+              <button
+                @click="toggleTheme"
+                class="flex items-center gap-2 px-4 py-2 bg-gray-900 text-gray-400 hover:bg-gray-800 border border-gray-700 rounded-lg transition-colors"
+              >
+                切换主题
+              </button>
+            </div>
+            <p class="mt-2 text-sm text-gray-400">
+              当前主题: {{ theme === 'dark' ? '深色模式' : '浅色模式' }}
+            </p>
+          </div>
+
           <!-- 其他设置预留 -->
           <div>
-            <h3 class="text-lg font-medium text-gray-200 mb-4">其他设置</h3>
+            <h3 class="text-lg font-medium text-gray-200 mb-4">高级设置</h3>
             <p class="text-gray-400 text-sm">更多设置选项将在后续版本中添加...</p>
           </div>
         </div>

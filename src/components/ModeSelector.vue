@@ -29,7 +29,7 @@ function switchMode(mode: string) {
 </script>
 
 <template>
-  <div class="bg-gray-900 border-b border-gray-800">
+  <div class="bg-[var(--topbar-bg)] border-b border-[var(--topbar-border)]">
     <div class="flex overflow-x-auto">
       <button
         v-for="[key, config] in Object.entries(MODES)"
@@ -38,15 +38,15 @@ function switchMode(mode: string) {
         :class="[
           'flex items-center gap-2 px-6 py-4 transition-all flex-shrink-0 relative',
           currentMode === key
-            ? 'text-blue-400'
-            : 'text-gray-400 hover:text-gray-300'
+            ? 'text-[var(--accent)]'
+            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
         ]"
       >
         <component :is="modeIcons[key as keyof typeof modeIcons]" :size="18" />
         <span class="text-sm font-medium">{{ config.label }}</span>
         <div
           v-if="currentMode === key"
-          class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400"
+          class="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]"
         ></div>
       </button>
     </div>

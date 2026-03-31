@@ -92,7 +92,7 @@ defineExpose({
       </p>
     </div>
 
-    <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+    <div class="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl overflow-hidden">
       <!-- 文本输入区域 -->
       <textarea
         ref="textareaRef"
@@ -100,14 +100,14 @@ defineExpose({
         @keydown="handleKeyDown"
         :disabled="!store.apiKey"
         :placeholder="store.apiKey ? '输入消息... (Shift+Enter换行，Enter发送)' : '请先设置 API Key'"
-        class="w-full px-4 py-3 bg-transparent text-gray-100 placeholder-gray-500 focus:outline-none resize-none min-h-[44px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
+        class="w-full px-4 py-3 bg-transparent text-[var(--text-primary)] placeholder-[var(--input-placeholder)] focus:outline-none resize-none min-h-[44px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
         rows="1"
       />
 
       <!-- 底部工具栏 -->
-      <div class="flex items-center justify-between px-4 py-2 border-t border-gray-700 bg-gray-800/50">
+      <div class="flex items-center justify-between px-4 py-2 border-t border-[var(--input-border)] bg-[var(--input-bg)]/50">
         <!-- 左侧：字数统计 -->
-        <div class="text-xs text-gray-500">
+        <div class="text-xs text-[var(--text-muted)]">
           {{ inputText.length }} 字
         </div>
 
@@ -122,8 +122,8 @@ defineExpose({
               :class="[
                 'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium',
                 canSend
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                  ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white'
+                  : 'bg-[var(--input-bg)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--input-border)]'
               ]"
               title="发送消息"
             >
