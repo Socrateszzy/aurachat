@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, watch, computed } from 'vue'
-import { Send } from 'lucide-vue-next'
+import { SendHorizonal } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
 
 const emit = defineEmits<{
@@ -44,7 +44,6 @@ function resetTextareaHeight() {
   nextTick(() => {
     if (textareaRef.value) {
       textareaRef.value.style.height = 'auto'
-      textareaRef.value.style.height = 'auto' // 重置
     }
   })
 }
@@ -84,55 +83,170 @@ defineExpose({
 </script>
 
 <template>
-  <div class="w-full">
+  <div class="chat-input-container">
     <!-- API Key 提示 -->
-    <div v-if="!store.apiKey" class="mb-4 p-3 bg-amber-900/30 border border-amber-700/50 rounded-lg">
-      <p class="text-amber-200 text-sm">
+    <div v-if="!store.apiKey" class="api-key-warning">
+      <p class="warning-text">
         请先点击左侧边栏底部的"设置"按钮，输入您的 DeepSeek API Key 以开始对话。
       </p>
     </div>
 
-    <div class="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl overflow-hidden">
-      <!-- 文本输入区域 -->
+    <!-- 输入框外壳 -->
+    <div class="input-wrapper">
       <textarea
         ref="textareaRef"
         v-model="inputText"
         @keydown="handleKeyDown"
         :disabled="!store.apiKey"
-        :placeholder="store.apiKey ? '输入消息... (Shift+Enter换行，Enter发送)' : '请先设置 API Key'"
-        class="w-full px-4 py-3 bg-transparent text-[var(--text-primary)] placeholder-[var(--input-placeholder)] focus:outline-none resize-none min-h-[44px] max-h-[200px] disabled:opacity-50 disabled:cursor-not-allowed"
+        :placeholder="store.apiKey ? '输入消息...' : '请先设置 API Key'"
+        class="message-input"
         rows="1"
       />
+      
+      <!-- 发送按钮 -->
+      <button
+        @click="handleSend"
+        :disabled="!canSend"
+        class="send-button"
+        :title="canSend ? '发送消息' : '请先输入内容并设置 API Key'"
+      >
+        <SendHorizonal :size="14" class="send-icon" />
+      </button>
+    </div>
 
-      <!-- 底部工具栏 -->
-      <div class="flex items-center justify-between px-4 py-2 border-t border-[var(--input-border)] bg-[var(--input-bg)]/50">
-        <!-- 左侧：字数统计 -->
-        <div class="text-xs text-[var(--text-muted)]">
-          {{ inputText.length }} 字
-        </div>
-
-        <!-- 右侧：发送/停止按钮 -->
-        <div class="flex items-center gap-2">
-          <!-- 这里预留 isStreaming 状态，由父组件传递 -->
-          <slot name="controls" :canSend="canSend" :inputText="inputText">
-            <!-- 默认按钮，父组件可以覆盖 -->
-            <button
-              @click="handleSend"
-              :disabled="!canSend"
-              :class="[
-                'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium',
-                canSend
-                  ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white'
-                  : 'bg-[var(--input-bg)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--input-border)]'
-              ]"
-              title="发送消息"
-            >
-              <Send :size="16" />
-              发送
-            </button>
-          </slot>
-        </div>
+    <!-- 底栏 -->
+    <div class="input-footer">
+      <div class="footer-left">
+        Enter 发送 · Shift+Enter 换行
+      </div>
+      <div class="footer-right">
+        {{ inputText.length }} 字
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* 整体容器 */
+.chat-input-container {
+  padding: 12px 16px 16px;
+  background: var(--main-bg);
+  border-top: 1px solid var(--topbar-border);
+}
+
+/* API Key 警告 */
+.api-key-warning {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+}
+
+.warning-text {
+  font-size: 12px;
+  color: rgba(245, 158, 11, 0.9);
+  line-height: 1.4;
+}
+
+/* 输入框外壳 */
+.input-wrapper {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.12);
+}
+
+/* 文本输入区域 */
+.message-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  resize: none;
+  min-height: 24px;
+  max-height: 200px;
+  line-height: 1.6;
+  font-family: inherit;
+}
+
+.message-input::placeholder {
+  color: var(--input-placeholder);
+}
+
+.message-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 发送按钮 */
+.send-button {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.send-button:not(:disabled) {
+  background: var(--accent);
+}
+
+.send-button:not(:disabled):hover {
+  background: var(--accent-hover);
+}
+
+.send-button:disabled {
+  background: var(--sidebar-item-active);
+  cursor: not-allowed;
+}
+
+.send-icon {
+  color: white;
+}
+
+/* 底栏 */
+.input-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.footer-left,
+.footer-right {
+  line-height: 1.4;
+}
+
+/* 移动端适配 */
+@media (max-width: 640px) {
+  .chat-input-container {
+    padding: 8px 12px 12px;
+  }
+  
+  .input-wrapper {
+    padding: 10px 12px;
+  }
+  
+  .input-footer {
+    font-size: 11px;
+  }
+}
+</style>

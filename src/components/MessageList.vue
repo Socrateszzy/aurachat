@@ -6,7 +6,6 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark-dimmed.css'
 import type { SessionMessage } from '../stores/chat'
 import { useChatStore } from '../stores/chat'
-import ChatHeader from './ChatHeader.vue'
 
 const emit = defineEmits<{
   send: [prompt: string]
@@ -72,6 +71,16 @@ function sendQuickPrompt(prompt: string) {
   emit('send', prompt)
 }
 
+// 格式化消息时间
+function formatMessageTime(timestamp: number): string {
+  const date = new Date(timestamp)
+  return date.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+}
+
 // 消息变化时滚动到底部
 onMounted(() => {
   scrollToBottom()
@@ -84,75 +93,237 @@ watch(messages, () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
-    <!-- 对话顶部工具栏 -->
-    <ChatHeader v-if="messages.length > 0" />
-    
-    <!-- 消息列表容器 -->
-    <div ref="listRef" class="flex-1 overflow-y-auto p-4">
-      <!-- 无消息时的欢迎区域 -->
-      <div v-if="messages.length === 0" class="flex flex-col items-center justify-center h-full text-[var(--text-muted)]">
-        <div class="max-w-2xl w-full text-center">
-          <Bot :size="64" class="mx-auto mb-6 text-[var(--accent)]" />
-          <h1 class="text-3xl font-bold mb-8 text-[var(--text-primary)]">欢迎使用 AuraChat</h1>
-          <p class="text-[var(--text-secondary)] mb-10 text-lg">
-            选择模式开始对话，或使用下面的快捷提示
-          </p>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-            <button
-              v-for="(prompt, index) in quickPrompts"
-              :key="index"
-              @click="sendQuickPrompt(prompt.text)"
-              class="bg-[var(--card-bg)] hover:bg-[var(--card-hover-bg)] border border-[var(--card-border)] rounded-xl p-5 text-left transition-all hover:scale-[1.02]"
-            >
-              <div class="text-sm font-medium text-[var(--accent)] mb-1">快捷提示</div>
-              <div class="text-[var(--text-primary)]">{{ prompt.text }}</div>
-            </button>
-          </div>
+  <div class="message-list" ref="listRef">
+    <!-- 无消息时的欢迎区域 -->
+    <div v-if="messages.length === 0" class="welcome-container">
+      <div class="welcome-content">
+        <Bot :size="48" class="welcome-icon" />
+        <h1 class="welcome-title">欢迎使用 AuraChat</h1>
+        <p class="welcome-subtitle">
+          选择模式开始对话，或使用下面的快捷提示
+        </p>
+        
+        <div class="quick-prompts-grid">
+          <button
+            v-for="(prompt, index) in quickPrompts"
+            :key="index"
+            @click="sendQuickPrompt(prompt.text)"
+            class="quick-prompt-card"
+          >
+            <div class="card-label">快捷提示</div>
+            <div class="card-text">{{ prompt.text }}</div>
+          </button>
         </div>
       </div>
-
-      <!-- 消息列表（有过渡动画） -->
-      <TransitionGroup
-        v-else
-        name="msg"
-        tag="div"
-        class="space-y-4"
-      >
-        <div
-          v-for="msg in messages"
-          :key="msg.id"
-          :class="[
-            'msg-item flex',
-            msg.role === 'user' ? 'justify-end' : 'justify-start'
-          ]"
-        >
-          <!-- 用户消息 -->
-          <div
-            v-if="msg.role === 'user'"
-            class="max-w-[70%] bg-[var(--bubble-user-bg)] text-[var(--bubble-user-text)] rounded-2xl px-4 py-2"
-          >
-            <div class="whitespace-pre-wrap break-words">{{ msg.content }}</div>
-          </div>
-          
-          <!-- 助手消息 -->
-          <div
-            v-else
-            class="max-w-[85%] bg-[var(--bubble-ai-bg)] border border-[var(--bubble-ai-border)] rounded-2xl px-4 py-3"
-          >
-            <div
-              class="prose prose-invert max-w-none text-[var(--text-primary)]"
-              v-html="getMessageHtml(msg)"
-            ></div>
-          </div>
-        </div>
-      </TransitionGroup>
     </div>
+
+    <!-- 消息列表（有过渡动画） -->
+    <TransitionGroup
+      v-else
+      name="msg"
+      tag="div"
+      class="messages-container"
+    >
+      <div
+        v-for="msg in messages"
+        :key="msg.id"
+        class="message-wrapper"
+      >
+        <!-- 消息时间 -->
+        <div class="message-time">
+          {{ formatMessageTime(msg.timestamp) }}
+        </div>
+        
+        <!-- 用户消息 -->
+        <div
+          v-if="msg.role === 'user'"
+          class="message-bubble user-bubble"
+        >
+          <div class="message-content">{{ msg.content }}</div>
+        </div>
+        
+        <!-- 助手消息 -->
+        <div
+          v-else
+          class="message-bubble assistant-bubble"
+        >
+          <div
+            class="message-content markdown-content"
+            v-html="getMessageHtml(msg)"
+          ></div>
+        </div>
+      </div>
+    </TransitionGroup>
   </div>
 </template>
 
 <style scoped>
+/* 消息列表容器 */
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  height: 100%;
+}
+
+/* 欢迎区域 */
+.welcome-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 500px;
+}
+
+.welcome-content {
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+}
+
+.welcome-icon {
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.welcome-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.welcome-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+
+/* 快捷提示网格 */
+.quick-prompts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 0 auto;
+  max-width: 560px;
+}
+
+.quick-prompt-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.quick-prompt-card:hover {
+  background: var(--card-hover-bg);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.card-label {
+  font-size: 11px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.card-text {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* 消息容器 */
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.message-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+/* 消息气泡基础样式 */
+.message-bubble {
+  max-width: 85%;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.user-bubble {
+  max-width: 75%;
+  float: right;
+  background: var(--bubble-user-bg);
+  color: var(--bubble-user-text);
+  border-radius: 18px 18px 4px 18px;
+  padding: 10px 16px;
+  align-self: flex-end;
+}
+
+.assistant-bubble {
+  background: var(--bubble-ai-bg);
+  border: 1px solid var(--bubble-ai-border);
+  border-radius: 4px 18px 18px 18px;
+  padding: 14px 18px;
+  align-self: flex-start;
+}
+
+.message-content {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* Markdown 内容样式 */
+.markdown-content {
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+
+.markdown-content :deep(pre) {
+  margin: 12px 0;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.markdown-content :deep(code) {
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+}
+
+.markdown-content :deep(.hljs) {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.markdown-content :deep(.streaming-cursor) {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /* 消息列表过渡动画 */
 .msg-enter-from {
   opacity: 0;
@@ -170,5 +341,18 @@ watch(messages, () => {
 }
 .msg-move {
   transition: transform 0.2s ease;
+}
+
+/* 移动端适配 */
+@media (max-width: 640px) {
+  .quick-prompts-grid {
+    grid-template-columns: 1fr;
+    max-width: 320px;
+  }
+  
+  .user-bubble,
+  .assistant-bubble {
+    max-width: 90%;
+  }
 }
 </style>

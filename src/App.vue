@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, provide } from 'vue'
-import { Menu } from 'lucide-vue-next'
-import { Send, Square } from 'lucide-vue-next'
+import { Menu, Square } from 'lucide-vue-next'
 import Sidebar from './components/Sidebar.vue'
 import ModeSelector from './components/ModeSelector.vue'
 import MessageList from './components/MessageList.vue'
@@ -81,37 +80,20 @@ function handleQuickPrompt(prompt: string) {
   </div>
 
       <!-- 输入框 -->
-      <div class="p-4 border-t border-[var(--topbar-border)] bg-[var(--topbar-bg)]">
-        <ChatInput ref="chatInputRef" @send="handleSend">
-          <template #controls="{ canSend, inputText }">
-            <!-- 流式响应时的停止按钮 -->
-            <button
-              v-if="isStreaming"
-              @click="stopStream"
-              class="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium"
-              title="停止生成"
-            >
-              <Square :size="16" />
-              停止
-            </button>
-            <!-- 正常发送按钮 -->
-            <button
-              v-else
-              @click="() => handleSend(inputText)"
-              :disabled="!canSend"
-              :class="[
-                'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium',
-                canSend
-                  ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white'
-                  : 'bg-[var(--input-bg)] text-[var(--text-muted)] cursor-not-allowed border border-[var(--input-border)]'
-              ]"
-              title="发送消息"
-            >
-              <Send :size="16" />
-              发送
-            </button>
-          </template>
-        </ChatInput>
+      <div class="chat-input-area">
+        <div class="input-wrapper">
+          <ChatInput ref="chatInputRef" @send="handleSend" />
+          <!-- 流式响应时的停止按钮 -->
+          <button
+            v-if="isStreaming"
+            @click="stopStream"
+            class="stop-button"
+            title="停止生成"
+          >
+            <Square :size="16" />
+            停止
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -134,5 +116,39 @@ function handleQuickPrompt(prompt: string) {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* 输入区域样式 */
+.chat-input-area {
+  padding: 12px 16px 16px;
+  background: var(--main-bg);
+  border-top: 1px solid var(--topbar-border);
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.stop-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  height: 46px;
+}
+
+.stop-button:hover {
+  background: #dc2626;
 }
 </style>
