@@ -1,4 +1,4 @@
-import type { ChatMessage } from './deepseek'
+import type { ChatMessage } from './chatService'
 
 export interface StreamResponse {
   text?: string

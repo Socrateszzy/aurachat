@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { useChatStore } from '../stores/chat'
-import { streamChat } from '../services/api'
-import type { ChatMessage } from '../services/deepseek'
+import { streamChat } from '../services/chatService'
+import type { ChatMessage } from '../services/chatService'
 
 export function useChat() {
   const store = useChatStore()
@@ -17,6 +17,7 @@ export function useChat() {
 
     const sessionId = session.id
     const modelId = store.selectedModelId
+    const mode = session.mode
 
     // 1. 添加用户消息
     store.addMessage(sessionId, {
@@ -52,6 +53,7 @@ export function useChat() {
     try {
       await streamChat(
         historyMessages,
+        mode,
         modelId,
         // 6. 流式更新最后一条消息
         (chunk) => {

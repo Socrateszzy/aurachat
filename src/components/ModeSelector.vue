@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { MessageCircle, Code2, Languages, PenLine } from 'lucide-vue-next'
-import { MODES, type ModeKey } from '../services/deepseek'
+import { MODES, type ModeKey } from '../services/chatService'
 import { useChatStore } from '../stores/chat'
 import ThemeToggle from './ThemeToggle.vue'
 

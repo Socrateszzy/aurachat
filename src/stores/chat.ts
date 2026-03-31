@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
-import type { ModeKey } from '../services/deepseek'
+import type { ModeKey } from '../services/chatService'
 import { DEFAULT_MODEL_ID } from '../config/models'
 
 export interface SessionMessage {
