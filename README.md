@@ -2,17 +2,6 @@
 
 AuraChat 是一个基于 Vue 3 + TypeScript + DeepSeek API 构建的现代化聊天应用，支持流式响应、多模式对话、Markdown渲染和代码高亮。
 
-## 截图
-
-### 主界面
-![主界面截图](https://via.placeholder.com/800x450/1a1a2e/e5e7eb?text=AuraChat+主界面)
-
-### 移动端
-![移动端截图](https://via.placeholder.com/400x700/1a1a2e/e5e7eb?text=移动端+侧边栏)
-
-### 代码高亮
-![代码高亮截图](https://via.placeholder.com/800x450/1a1a2e/e5e7eb?text=Markdown+代码高亮)
-
 ## 功能特性
 
 ### 🤖 智能对话
@@ -181,25 +170,3 @@ src/
 2. **使用限制**：请遵守DeepSeek API的使用条款和频率限制
 3. **本地存储**：所有对话历史存储在浏览器localStorage中
 4. **浏览器兼容**：推荐使用Chrome、Firefox、Edge等现代浏览器
-
-## 贡献指南
-
-1. Fork 本仓库
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
-
-## 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 联系方式
-
-- 项目主页：[GitHub Repository](https://github.com/yourusername/aurachat)
-- 问题反馈：[Issues](https://github.com/yourusername/aurachat/issues)
-- 功能建议：[Discussions](https://github.com/yourusername/aurachat/discussions)
-
----
-
-**提示**：本项目为学习交流目的开发，请合理使用AI服务，遵守相关法律法规。
