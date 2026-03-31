@@ -6,6 +6,7 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark-dimmed.css'
 import type { SessionMessage } from '../stores/chat'
 import { useChatStore } from '../stores/chat'
+import ChatHeader from './ChatHeader.vue'
 
 const emit = defineEmits<{
   send: [prompt: string]
@@ -83,59 +84,91 @@ watch(messages, () => {
 </script>
 
 <template>
-  <div ref="listRef" class="flex-1 overflow-y-auto p-4 space-y-4">
-    <!-- 无消息时的欢迎区域 -->
-    <div v-if="messages.length === 0" class="flex flex-col items-center justify-center h-full text-gray-300">
-      <div class="max-w-2xl w-full text-center">
-        <Bot :size="64" class="mx-auto mb-6 text-blue-400" />
-        <h1 class="text-3xl font-bold mb-8">欢迎使用 AuraChat</h1>
-        <p class="text-gray-400 mb-10 text-lg">
-          选择模式开始对话，或使用下面的快捷提示
-        </p>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-          <button
-            v-for="(prompt, index) in quickPrompts"
-            :key="index"
-            @click="sendQuickPrompt(prompt.text)"
-            class="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl p-5 text-left transition-all hover:scale-[1.02]"
-          >
-            <div class="text-sm font-medium text-blue-400 mb-1">快捷提示</div>
-            <div class="text-gray-200">{{ prompt.text }}</div>
-          </button>
+  <div class="flex flex-col h-full">
+    <!-- 对话顶部工具栏 -->
+    <ChatHeader v-if="messages.length > 0" />
+    
+    <!-- 消息列表容器 -->
+    <div ref="listRef" class="flex-1 overflow-y-auto p-4">
+      <!-- 无消息时的欢迎区域 -->
+      <div v-if="messages.length === 0" class="flex flex-col items-center justify-center h-full text-gray-300">
+        <div class="max-w-2xl w-full text-center">
+          <Bot :size="64" class="mx-auto mb-6 text-blue-400" />
+          <h1 class="text-3xl font-bold mb-8">欢迎使用 AuraChat</h1>
+          <p class="text-gray-400 mb-10 text-lg">
+            选择模式开始对话，或使用下面的快捷提示
+          </p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+            <button
+              v-for="(prompt, index) in quickPrompts"
+              :key="index"
+              @click="sendQuickPrompt(prompt.text)"
+              class="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl p-5 text-left transition-all hover:scale-[1.02]"
+            >
+              <div class="text-sm font-medium text-blue-400 mb-1">快捷提示</div>
+              <div class="text-gray-200">{{ prompt.text }}</div>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 消息列表 -->
-    <div v-else class="space-y-4">
-      <div
-        v-for="msg in messages"
-        :key="msg.id"
-        :class="[
-          'flex',
-          msg.role === 'user' ? 'justify-end' : 'justify-start'
-        ]"
+      <!-- 消息列表（有过渡动画） -->
+      <TransitionGroup
+        v-else
+        name="msg"
+        tag="div"
+        class="space-y-4"
       >
-        <!-- 用户消息 -->
         <div
-          v-if="msg.role === 'user'"
-          class="max-w-[70%] bg-blue-600 text-white rounded-2xl px-4 py-2"
+          v-for="msg in messages"
+          :key="msg.id"
+          :class="[
+            'msg-item flex',
+            msg.role === 'user' ? 'justify-end' : 'justify-start'
+          ]"
         >
-          <div class="whitespace-pre-wrap break-words">{{ msg.content }}</div>
-        </div>
-        
-        <!-- 助手消息 -->
-        <div
-          v-else
-          class="max-w-[85%] bg-gray-800 rounded-2xl px-4 py-3"
-        >
+          <!-- 用户消息 -->
           <div
-            class="prose prose-invert max-w-none text-gray-200"
-            v-html="getMessageHtml(msg)"
-          ></div>
+            v-if="msg.role === 'user'"
+            class="max-w-[70%] bg-blue-600 text-white rounded-2xl px-4 py-2"
+          >
+            <div class="whitespace-pre-wrap break-words">{{ msg.content }}</div>
+          </div>
+          
+          <!-- 助手消息 -->
+          <div
+            v-else
+            class="max-w-[85%] bg-gray-800 rounded-2xl px-4 py-3"
+          >
+            <div
+              class="prose prose-invert max-w-none text-gray-200"
+              v-html="getMessageHtml(msg)"
+            ></div>
+          </div>
         </div>
-      </div>
+      </TransitionGroup>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* 消息列表过渡动画 */
+.msg-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.msg-enter-active {
+  transition: all 0.2s ease;
+}
+.msg-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+.msg-leave-active {
+  transition: all 0.2s ease;
+}
+.msg-move {
+  transition: transform 0.2s ease;
+}
+</style>

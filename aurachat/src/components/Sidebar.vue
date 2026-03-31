@@ -47,32 +47,34 @@ function handleNewChat() {
       </button>
     </div>
 
-    <!-- 会话列表 -->
+    <!-- 会话列表（有过渡动画） -->
     <div class="flex-1 overflow-y-auto p-2">
-      <div
-        v-for="session in [...store.sessions].reverse()"
-        :key="session.id"
-        @click="store.switchSession(session.id)"
-        :class="[
-          'group relative flex items-center justify-between p-3 rounded-lg mb-1 cursor-pointer transition-colors',
-          store.currentSessionId === session.id
-            ? 'bg-gray-700'
-            : 'hover:bg-gray-800'
-        ]"
-      >
-        <div class="flex-1 min-w-0">
-          <div class="font-medium truncate">{{ session.title }}</div>
-          <div class="text-xs text-gray-400 mt-1">
-            {{ formatTime(session.createdAt) }}
-          </div>
-        </div>
-        <button
-          @click.stop="store.deleteSession(session.id)"
-          class="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-600 rounded transition-opacity"
+      <TransitionGroup name="session" tag="div">
+        <div
+          v-for="session in [...store.sessions].reverse()"
+          :key="session.id"
+          @click="store.switchSession(session.id)"
+          :class="[
+            'session-item group relative flex items-center justify-between p-3 rounded-lg mb-1 cursor-pointer transition-colors',
+            store.currentSessionId === session.id
+              ? 'bg-gray-700'
+              : 'hover:bg-gray-800'
+          ]"
         >
-          <Trash2 :size="14" class="text-gray-400" />
-        </button>
-      </div>
+          <div class="flex-1 min-w-0">
+            <div class="font-medium truncate">{{ session.title }}</div>
+            <div class="text-xs text-gray-400 mt-1">
+              {{ formatTime(session.createdAt) }}
+            </div>
+          </div>
+          <button
+            @click.stop="store.deleteSession(session.id)"
+            class="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-600 rounded transition-opacity"
+          >
+            <Trash2 :size="14" class="text-gray-400" />
+          </button>
+        </div>
+      </TransitionGroup>
     </div>
 
     <!-- 底部设置 -->
@@ -90,3 +92,24 @@ function handleNewChat() {
     <SettingsModal v-if="showSettings" @close="showSettings = false" />
   </div>
 </template>
+
+<style scoped>
+/* 会话列表过渡动画 */
+.session-enter-from {
+  opacity: 0;
+  transform: translateX(-8px);
+}
+.session-enter-active {
+  transition: all 0.2s ease;
+}
+.session-leave-to {
+  opacity: 0;
+  transform: translateX(8px);
+}
+.session-leave-active {
+  transition: all 0.2s ease;
+}
+.session-move {
+  transition: transform 0.2s ease;
+}
+</style>
