@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { X, Eye, EyeOff, ExternalLink, Sun, Moon } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { X, Sun, Moon } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
 import { useThemeStore } from '../stores/theme'
+import { MODELS, PROVIDER_COLORS } from '../config/models'
 
 const props = defineProps<{
   modelValue?: boolean
@@ -13,11 +14,13 @@ const emit = defineEmits<{
 }>()
 
 const store = useChatStore()
-const apiKeyInput = ref(store.apiKey)
-const showApiKey = ref(false)
-
-// 主题管理
 const themeStore = useThemeStore()
+
+// 当前选择的模型
+const selectedModelId = computed({
+  get: () => store.selectedModelId,
+  set: (value) => store.setModel(value)
+})
 
 // 辅助函数
 function setTheme(dark: boolean) {
@@ -28,15 +31,15 @@ function toggleTheme() {
   themeStore.toggle()
 }
 
-function saveApiKey() {
-  store.setApiKey(apiKeyInput.value)
-  emit('close')
-}
-
 function handleBackdropClick(e: MouseEvent) {
   if ((e.target as HTMLElement).classList.contains('modal-backdrop')) {
     emit('close')
   }
+}
+
+function handleSave() {
+  // 这里可以添加其他保存逻辑
+  emit('close')
 }
 </script>
 
@@ -60,38 +63,52 @@ function handleBackdropClick(e: MouseEvent) {
       <!-- 内容区域 -->
       <div class="p-6">
         <div class="space-y-6">
-          <!-- API Key 设置 -->
+          <!-- 模型选择 -->
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">
-              DeepSeek API Key
+              默认模型
             </label>
-            <div class="relative">
-              <input
-                v-model="apiKeyInput"
-                :type="showApiKey ? 'text' : 'password'"
-                placeholder="输入您的 DeepSeek API Key"
+            <div class="space-y-2">
+              <select
+                v-model="selectedModelId"
                 class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-              <button
-                @click="showApiKey = !showApiKey"
-                class="absolute right-3 top-3 text-gray-400 hover:text-gray-300"
-                type="button"
               >
-                <Eye v-if="!showApiKey" :size="20" />
-                <EyeOff v-else :size="20" />
-              </button>
+                <option v-for="model in MODELS" :key="model.id" :value="model.id">
+                  {{ model.provider }} - {{ model.name }}
+                </option>
+              </select>
+              <div v-if="selectedModelId" class="mt-2 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+                <div class="flex items-center gap-2 mb-1">
+                  <div 
+                    class="w-3 h-3 rounded-full"
+                    :style="{ backgroundColor: PROVIDER_COLORS[MODELS.find(m => m.id === selectedModelId)?.providerIcon || 'deepseek'] }"
+                  ></div>
+                  <span class="font-medium text-gray-200">
+                    {{ MODELS.find(m => m.id === selectedModelId)?.name }}
+                  </span>
+                  <span 
+                    v-if="MODELS.find(m => m.id === selectedModelId)?.badge"
+                    class="px-2 py-0.5 text-xs rounded-full bg-purple-600 text-white"
+                  >
+                    {{ MODELS.find(m => m.id === selectedModelId)?.badge }}
+                  </span>
+                </div>
+                <p class="text-sm text-gray-400">
+                  {{ MODELS.find(m => m.id === selectedModelId)?.description }}
+                </p>
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <span 
+                    v-for="tag in MODELS.find(m => m.id === selectedModelId)?.tags" 
+                    :key="tag"
+                    class="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded"
+                  >
+                    {{ tag }}
+                  </span>
+                </div>
+              </div>
             </div>
             <p class="mt-2 text-sm text-gray-400">
-              您可以在
-              <a
-                href="https://platform.deepseek.com"
-                target="_blank"
-                class="text-purple-400 hover:text-purple-300 underline inline-flex items-center gap-1"
-              >
-                DeepSeek 平台
-                <ExternalLink :size="14" />
-              </a>
-              申请 API Key
+              更改后将应用于新对话
             </p>
           </div>
 
@@ -135,10 +152,17 @@ function handleBackdropClick(e: MouseEvent) {
             </p>
           </div>
 
-          <!-- 其他设置预留 -->
+          <!-- 后端状态 -->
           <div>
-            <h3 class="text-lg font-medium text-gray-200 mb-4">高级设置</h3>
-            <p class="text-gray-400 text-sm">更多设置选项将在后续版本中添加...</p>
+            <h3 class="text-lg font-medium text-gray-200 mb-4">后端状态</h3>
+            <div class="p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+              <p class="text-sm text-gray-300">
+                API 服务器已移至后端，无需在前端配置 API Key。
+              </p>
+              <p class="text-sm text-gray-400 mt-1">
+                请确保后端服务器正在运行，并配置了相应的 API Key。
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -152,7 +176,7 @@ function handleBackdropClick(e: MouseEvent) {
           取消
         </button>
         <button
-          @click="saveApiKey"
+          @click="handleSave"
           class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
         >
           保存

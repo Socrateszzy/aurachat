@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { useChatStore } from '../stores/chat'
-import { streamChat, type ChatMessage } from '../services/deepseek'
+import { streamChat } from '../services/api'
+import type { ChatMessage } from '../services/deepseek'
 
 export function useChat() {
   const store = useChatStore()
@@ -8,13 +9,6 @@ export function useChat() {
   const abortController = ref<AbortController | null>(null)
 
   async function sendMessage(content: string) {
-    // 1. 检查API Key
-    if (!store.apiKey) {
-      // 这里可以emit事件或返回提示，暂时先返回
-      console.warn('请先设置API Key')
-      return '请先设置API Key'
-    }
-
     const session = store.currentSession
     if (!session) {
       console.warn('没有活动会话')
@@ -22,34 +16,34 @@ export function useChat() {
     }
 
     const sessionId = session.id
-    const currentMode = session.mode
+    const modelId = store.selectedModelId
 
-    // 2. 添加用户消息
+    // 1. 添加用户消息
     store.addMessage(sessionId, {
       role: 'user',
       content,
       timestamp: Date.now()
     })
 
-    // 3. 如果是第一条消息，更新会话标题
+    // 2. 如果是第一条消息，更新会话标题
     const messages = session.messages
     if (messages.length === 1) { // 刚刚添加了一条用户消息
       const title = content.slice(0, 20) + (content.length > 20 ? '...' : '')
       store.updateSessionTitle(sessionId, title)
     }
 
-    // 4. 添加空的助手消息
+    // 3. 添加空的助手消息
     store.addMessage(sessionId, {
       role: 'assistant',
       content: '',
       timestamp: Date.now()
     })
 
-    // 5. 开始流式响应
+    // 4. 开始流式响应
     isStreaming.value = true
     abortController.value = new AbortController()
 
-    // 6. 构建消息历史（session.messages 只包含用户和助手消息）
+    // 5. 构建消息历史
     const historyMessages: ChatMessage[] = session.messages.map(msg => ({
       role: msg.role as 'user' | 'assistant',
       content: msg.content
@@ -58,18 +52,17 @@ export function useChat() {
     try {
       await streamChat(
         historyMessages,
-        currentMode,
-        store.apiKey,
-        // 7. 流式更新最后一条消息
+        modelId,
+        // 6. 流式更新最后一条消息
         (chunk) => {
           store.updateLastMessage(sessionId, chunk)
         },
-        // 8. 完成回调
+        // 7. 完成回调
         () => {
           isStreaming.value = false
           abortController.value = null
         },
-        // 9. 错误回调
+        // 8. 错误回调
         (error) => {
           console.error('Stream error:', error)
           isStreaming.value = false

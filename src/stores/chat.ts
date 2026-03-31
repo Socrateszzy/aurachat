@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import type { ModeKey } from '../services/deepseek'
+import { DEFAULT_MODEL_ID } from '../config/models'
 
 export interface SessionMessage {
   id: string
@@ -24,7 +25,7 @@ export const useChatStore = defineStore(
     // state
     const sessions = ref<Session[]>([])
     const currentSessionId = ref<string | null>(null)
-    const apiKey = ref<string>('')
+    const selectedModelId = ref<string>(DEFAULT_MODEL_ID)
 
     // computed
     const currentSession = computed(() => {
@@ -107,14 +108,14 @@ export const useChatStore = defineStore(
       }
     }
 
-    function setApiKey(key: string) {
-      apiKey.value = key
+    function setModel(modelId: string) {
+      selectedModelId.value = modelId
     }
 
     return {
       sessions,
       currentSessionId,
-      apiKey,
+      selectedModelId,
       currentSession,
       createSession,
       deleteSession,
@@ -122,14 +123,14 @@ export const useChatStore = defineStore(
       addMessage,
       updateLastMessage,
       updateSessionTitle,
-      setApiKey
+      setModel
     }
   },
   {
     persist: {
       key: 'aurachat',
       storage: localStorage,
-      pick: ['sessions', 'currentSessionId', 'apiKey']
+      pick: ['sessions', 'currentSessionId', 'selectedModelId']
     }
   }
 )

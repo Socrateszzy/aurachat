@@ -19,7 +19,6 @@ const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const canSend = computed(() => {
   return (
     inputText.value.trim().length > 0 &&
-    store.apiKey.length > 0 &&
     store.currentSession
   )
 })
@@ -88,21 +87,13 @@ defineExpose({
 
 <template>
   <div class="chat-input-container">
-    <!-- API Key 提示 -->
-    <div v-if="!store.apiKey" class="api-key-warning">
-      <p class="warning-text">
-        请先点击左侧边栏底部的"设置"按钮，输入您的 DeepSeek API Key 以开始对话。
-      </p>
-    </div>
-
     <!-- 输入框外壳 -->
     <div class="input-wrapper">
       <textarea
         ref="textareaRef"
         v-model="inputText"
         @keydown="handleKeyDown"
-        :disabled="!store.apiKey"
-        :placeholder="store.apiKey ? '输入消息...' : '请先设置 API Key'"
+        placeholder="输入消息..."
         class="message-input"
         rows="1"
       />
@@ -112,7 +103,7 @@ defineExpose({
         @click="handleSend"
         :disabled="!canSend"
         class="send-button"
-        :title="canSend ? '发送消息' : '请先输入内容并设置 API Key'"
+        :title="canSend ? '发送消息' : '请输入内容'"
       >
         <SendHorizonal :size="14" class="send-icon" />
       </button>
