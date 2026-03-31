@@ -3,6 +3,10 @@ import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import { SendHorizonal } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
 
+const props = defineProps<{
+  isStreaming?: boolean
+}>()
+
 const emit = defineEmits<{
   send: [content: string]
 }>()

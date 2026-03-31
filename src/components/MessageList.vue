@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, nextTick, watch, inject } from 'vue'
+import { computed, ref, onMounted, nextTick, watch } from 'vue'
 import { Bot } from 'lucide-vue-next'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
@@ -11,9 +11,12 @@ const emit = defineEmits<{
   send: [prompt: string]
 }>()
 
+const props = defineProps<{
+  isStreaming?: boolean
+}>()
+
 const store = useChatStore()
 const listRef = ref<HTMLElement | null>(null)
-const isStreaming = inject('isStreaming', ref(false))
 
 // 当前会话的消息列表
 const messages = computed(() => {
@@ -52,7 +55,7 @@ const md: MarkdownIt = new MarkdownIt({
 
 // 获取消息的HTML内容
 function getMessageHtml(msg: SessionMessage): string {
-  const showCursor = msg === lastAssistantMessage.value && isStreaming?.value
+  const showCursor = msg === lastAssistantMessage.value && props.isStreaming
   const content = msg.content + (showCursor ? '<span class="streaming-cursor"></span>' : '')
   return md.render(content)
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, provide } from 'vue'
-import { Menu, Square } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { Square } from 'lucide-vue-next'
 import Sidebar from './components/Sidebar.vue'
 import ModeSelector from './components/ModeSelector.vue'
 import MessageList from './components/MessageList.vue'
@@ -9,80 +9,94 @@ import { initStore } from './stores/chat'
 import { useChat } from './composables/useChat'
 
 const isSidebarOpen = ref(false)
-// 模板中需要绑定ref，但逻辑中暂未使用
-// @ts-ignore
-const chatInputRef = ref<InstanceType<typeof ChatInput> | null>(null)
+const isMobile = ref(false)
 const { sendMessage, stopStream, isStreaming } = useChat()
+
+// 检查是否为移动端
+function checkMobile() {
+  isMobile.value = window.innerWidth < 768
+}
+
+// 切换侧边栏
+function toggleSidebar() {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+
+// 关闭侧边栏（移动端）
+function closeSidebar() {
+  if (isMobile.value) {
+    isSidebarOpen.value = false
+  }
+}
 
 onMounted(() => {
   initStore()
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
 })
 
-// 提供 isStreaming 给子组件
-provide('isStreaming', isStreaming)
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
 
 // 处理发送消息
 async function handleSend(content: string) {
   await sendMessage(content)
 }
-
-// 处理快捷提示
-function handleQuickPrompt(prompt: string) {
-  // 直接发送消息，不需要通过chatInputRef
-  sendMessage(prompt)
-}
-
-// 聚焦输入框（暂不使用，保留以供未来需要）
-// function focusInput() {
-//   if (chatInputRef.value) {
-//     chatInputRef.value.focus()
-//   }
-// }
 </script>
 
 <template>
-  <div class="flex h-screen overflow-hidden bg-[var(--main-bg)] text-[var(--text-primary)]">
-    <!-- 移动端汉堡菜单 -->
-    <button
-      @click="isSidebarOpen = !isSidebarOpen"
-      class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[var(--sidebar-item-hover)] rounded-lg hover:bg-[var(--sidebar-item-active)] transition-colors"
-    >
-      <Menu :size="20" />
-    </button>
-
+  <div id="layout" class="app-shell">
+    <!-- 移动端遮罩 -->
+    <div 
+      v-if="isSidebarOpen && isMobile" 
+      class="sidebar-overlay" 
+      @click="closeSidebar"
+    />
+    
     <!-- 侧边栏 -->
     <div
       :class="[
-        'fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out',
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        'sidebar-container',
+        isMobile ? 'mobile-sidebar' : 'desktop-sidebar',
+        isSidebarOpen ? 'open' : ''
       ]"
     >
       <Sidebar />
     </div>
-
-    <!-- 侧边栏遮罩 -->
-    <div
-      v-if="isSidebarOpen"
-      @click="isSidebarOpen = false"
-      class="lg:hidden fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
-    ></div>
-
+    
     <!-- 主内容区域 -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- 顶部模式选择器 -->
-      <div class="p-4 border-b border-[var(--topbar-border)] bg-[var(--topbar-bg)]">
-        <ModeSelector />
-      </div>
-
-  <!-- 消息列表 -->
-  <div class="flex-1 overflow-hidden">
-    <MessageList @send="handleQuickPrompt" />
-  </div>
-
+    <div class="main-panel">
+      <!-- 移动端汉堡菜单 -->
+      <button
+        v-if="isMobile"
+        @click="toggleSidebar"
+        class="mobile-menu-btn"
+        title="切换侧边栏"
+        aria-label="切换侧边栏"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path v-if="isSidebarOpen" d="M6 18L18 6M6 6l12 12" />
+          <path v-else d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      
+      <!-- 模式选择器 -->
+      <ModeSelector />
+      
+      <!-- 消息列表 -->
+      <MessageList 
+        @send="handleSend" 
+        :isStreaming="isStreaming" 
+      />
+      
       <!-- 输入框 -->
       <div class="chat-input-area">
         <div class="input-wrapper">
-          <ChatInput ref="chatInputRef" @send="handleSend" />
+          <ChatInput 
+            @send="handleSend" 
+            :isStreaming="isStreaming" 
+          />
           <!-- 流式响应时的停止按钮 -->
           <button
             v-if="isStreaming"
@@ -99,23 +113,77 @@ function handleQuickPrompt(prompt: string) {
   </div>
 </template>
 
-<style>
-/* 自定义滚动条 */
-::-webkit-scrollbar {
-  width: 8px;
+<style scoped>
+/* 应用外壳 */
+.app-shell {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--main-bg);
+  color: var(--text-primary);
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+/* 侧边栏容器 */
+.sidebar-container {
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+/* 桌面端侧边栏 */
+.desktop-sidebar {
+  width: var(--sidebar-width);
+  border-right: 1px solid var(--sidebar-border);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+/* 移动端侧边栏 */
+.mobile-sidebar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  z-index: 50;
+  border-right: 1px solid var(--sidebar-border);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.mobile-sidebar.open {
+  transform: translateX(0);
+}
+
+/* 主面板 */
+.main-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  position: relative;
+}
+
+/* 移动端菜单按钮 */
+.mobile-menu-btn {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 40;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sidebar-item-hover);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.mobile-menu-btn:hover {
+  background: var(--sidebar-item-active);
 }
 
 /* 输入区域样式 */
@@ -150,5 +218,34 @@ function handleQuickPrompt(prompt: string) {
 
 .stop-button:hover {
   background: #dc2626;
+}
+</style>
+
+<style>
+/* 全局滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 亮色主题滚动条 */
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 </style>
