@@ -28,10 +28,6 @@ function toggleTheme() {
   themeStore.toggle()
 }
 
-function getThemeName() {
-  return themeStore.isDark ? 'dark' : 'light'
-}
-
 function saveApiKey() {
   store.setApiKey(apiKeyInput.value)
   emit('close')

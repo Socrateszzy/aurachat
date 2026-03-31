@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { Trash2, Settings, Plus } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
 import SettingsModal from './SettingsModal.vue'
+import ThemeToggle from './ThemeToggle.vue'
 
 const store = useChatStore()
 const showSettings = ref(false)
@@ -37,6 +38,7 @@ function handleNewChat() {
         <h1 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
           AuraChat
         </h1>
+        <ThemeToggle />
       </div>
       <button
         @click="handleNewChat"
