@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { X, Eye, EyeOff, ExternalLink, Sun, Moon } from 'lucide-vue-next'
 import { useChatStore } from '../stores/chat'
-import { useTheme } from '../composables/useTheme'
+import { useThemeStore } from '../stores/theme'
 
 const props = defineProps<{
   modelValue?: boolean
@@ -17,7 +17,20 @@ const apiKeyInput = ref(store.apiKey)
 const showApiKey = ref(false)
 
 // 主题管理
-const { theme, toggleTheme, setTheme } = useTheme()
+const themeStore = useThemeStore()
+
+// 辅助函数
+function setTheme(dark: boolean) {
+  themeStore.isDark = dark
+}
+
+function toggleTheme() {
+  themeStore.toggle()
+}
+
+function getThemeName() {
+  return themeStore.isDark ? 'dark' : 'light'
+}
 
 function saveApiKey() {
   store.setApiKey(apiKeyInput.value)
@@ -91,10 +104,10 @@ function handleBackdropClick(e: MouseEvent) {
             <h3 class="text-lg font-medium text-gray-200 mb-4">主题设置</h3>
             <div class="flex items-center gap-4">
               <button
-                @click="setTheme('dark')"
+                @click="setTheme(true)"
                 :class="[
                   'flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
-                  theme === 'dark'
+                  themeStore.isDark
                     ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
                     : 'bg-gray-900 text-gray-400 border-gray-700 hover:bg-gray-800'
                 ]"
@@ -103,10 +116,10 @@ function handleBackdropClick(e: MouseEvent) {
                 深色
               </button>
               <button
-                @click="setTheme('light')"
+                @click="setTheme(false)"
                 :class="[
                   'flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
-                  theme === 'light'
+                  !themeStore.isDark
                     ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
                     : 'bg-gray-900 text-gray-400 border-gray-700 hover:bg-gray-800'
                 ]"
@@ -122,7 +135,7 @@ function handleBackdropClick(e: MouseEvent) {
               </button>
             </div>
             <p class="mt-2 text-sm text-gray-400">
-              当前主题: {{ theme === 'dark' ? '深色模式' : '浅色模式' }}
+              当前主题: {{ themeStore.isDark ? '深色模式' : '浅色模式' }}
             </p>
           </div>
 

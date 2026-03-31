@@ -3,10 +3,12 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import './assets/main.css'
 import App from './App.vue'
-import { initThemeSystem } from './composables/useTheme'
 
-// 初始化主题系统
-initThemeSystem()
+// 在 Vue 挂载前立即应用主题，避免 FOUC
+const savedTheme = localStorage.getItem('aurachat-theme')
+if (savedTheme === 'light') {
+  document.documentElement.classList.add('light')
+}
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
