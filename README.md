@@ -45,13 +45,13 @@ AuraChat 是一个基于 Vue 3 + TypeScript + DeepSeek API 构建的现代化聊
 - **uuid** - 唯一ID生成
 - **DeepSeek API** - AI聊天接口
 
-## 快速开始
+## 本地运行
 
 ### 环境要求
 - Node.js 18+ 或更高版本
 - npm 或 yarn 或 pnpm
 
-### 本地运行
+### 安装步骤
 
 1. **克隆项目**
 ```bash
@@ -61,23 +61,35 @@ cd aurachat
 
 2. **安装依赖**
 ```bash
-npm install
+npm install && cd server && npm install && cd ..
 ```
 
-3. **获取API Key**
-   - 访问 [DeepSeek 官网](https://platform.deepseek.com/) 注册账号
-   - 在个人中心创建API Key
+3. **配置后端 Key**
+```bash
+cp server/.env.example server/.env
+```
+按需填入对应平台的 API Key：
 
-4. **配置API Key**
-   - 启动应用：`npm run dev`
-   - 打开 http://localhost:5173
-   - 点击左侧边栏底部"设置"按钮
-   - 输入您的DeepSeek API Key并保存
+4. **启动（前后端同时）**
+```bash
+npm run dev:all
+```
 
-5. **开始使用**
-   - 选择对话模式（通用助手/代码助手/翻译/写作润色）
-   - 输入消息开始对话
-   - 使用快捷提示快速发起常用对话
+5. **访问应用**
+打开浏览器访问：http://localhost:5173
+
+### 模型说明
+| 模型 | 需要的 Key | 获取地址 |
+|------|-----------|---------|
+| DeepSeek Chat/Coder | DEEPSEEK_API_KEY | platform.deepseek.com |
+| GPT-4o / GPT-4o mini | OPENAI_API_KEY | platform.openai.com |
+| Claude 3.5 Sonnet | ANTHROPIC_API_KEY | console.anthropic.com |
+| Gemini 1.5 Pro | GEMINI_API_KEY | aistudio.google.com |
+
+### 开始使用
+1. 选择对话模式（通用助手/代码助手/翻译/写作润色）
+2. 从顶栏选择AI模型
+3. 输入消息开始对话
 
 ### 开发命令
 
